@@ -6,6 +6,12 @@ headers = { "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit
 
 totalJobs = 0
 
+def filter():
+    badFiltersFile = open("BadFilter.txt", "r")
+    badFiltersContent = badFiltersFile.readlines()
+    minExperienceLimit = badFiltersContent[2][15]
+    print("exclude >=", minExperienceLimit, "years minimum experience")
+
 #After the main program scrapes a job link it will open it here to scrape for more details specific to the position.
 def details_scrape(jobURL):
     print("\tJOB DETAILS:")
@@ -20,7 +26,7 @@ def details_scrape(jobURL):
 
     print(jobDescription.getText().strip())
 
-
+filter()
 g = 0
 while g < 100:
     #URL to be scraped on indeed it goes by 10 per page default
