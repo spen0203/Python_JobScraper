@@ -1,9 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 #specific to machine allows connection - google "my user agent" and paste in.
 headers = { "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'}
 
+x = 0
 
 
 ## jobCardScrape
@@ -13,15 +15,14 @@ def jobCardScrape(jobPost):
     companyName = jobPost.find(class_="company")
     companyLink = "https://ca.indeed.com" + str(jobPost.find('a', class_="jobtitle").get('href'))
     if (jobPost.find(class_="iaLabel") ):
-        print("Æ\t", jobTitle.getText().strip() ," Æ")
+        easilyApply = 1
     else:
-        print("Æ\t", jobTitle.getText().strip())
-    print("Æ\t", companyName.getText().strip())
-    print(companyLink)
-    details_scrape(companyLink)
+        easilyApply =0
+    
+    details_scrape(jobTitle, companyName,  companyLink, easilyApply)
 
-def details_scrape(jobURL):
-    print("\nJOB DETAILS:")
+def details_scrape(jobTitle, companyName, jobURL, easilyApply):
+    #print("\nJOB DETAILS:")
      #returns all the information from the URL
     page = requests.get(jobURL, headers=headers)
     #Pass the page data to beatiful soup for parsing (soup now contains entire html page)
@@ -31,20 +32,58 @@ def details_scrape(jobURL):
 
     #Then i will have to decide on a filtering system to decide what jobs should then be emailed or updated to a spreadsheet for me to apply.
     #I could then look into potential ranking, automated resume editing and automated resume submissions to make finding my future career an easier task.
-
-    print(jobDescription.getText().strip())
-
+    filterScore(jobTitle, companyName, jobURL, jobDescription, easilyApply)
 
 
+def filterScore(jobTitle, companyName, jobURL, jobDesc, easilyApply):
+    #Start by filtering out minimum years experience
+    badFiltersFile = open("BadFilter.txt", "r")
+    badFiltersContent = badFiltersFile.readlines()
+    minExperienceLimit = int(badFiltersContent[2][15])
+    badMatchFlag = 0 #Flag set to 1 if a match <= minExperienceLimit
+
+    #Use Regex now to try and find any mention of minimum __ years experience, ( ie. 7 , anything 7 or GT would be discarded)
+    while((minExperienceLimit <= 30) & (badMatchFlag == 0)):
+        minExperienceRegex = re.compile(r"(?:min(?:imum)?)? ?(?:["+ str(minExperienceLimit) + "-9]|[0-9]\d)\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?")
+         
+
+        if minExperienceRegex.search(jobDesc.getText().strip()):#check for match
+            #print("minimum experience beyond cutoff") #regex correctly takes value from file
+            badMatchFlag = 1 #set Flag if match found
+        minExperienceLimit = minExperienceLimit + 1 #increment minExperience limit
+    if(badMatchFlag == 0):
+        printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc.getText().strip())
+
+def printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc):
+    global x 
+    x = x + 1
+    print("\n----------- Job #", x," -----------")
+    if(easilyApply == 1):
+        print("Æ\t", jobTitle.getText().strip())
+        print("Æ\t", companyName.getText().strip())
+    else:
+        print("\t", jobTitle.getText().strip())
+        print("\t", companyName.getText().strip())
+    print(jobURL)
+    print("\n", jobDesc)
+
+
+
+    #if(jobDesc.findAll())
+    # "(?:min(?:imum)?)? ?(?:[7-9]|[1-9]\d) years ?(?:of)? experience"
+    #https://regex101.com/r/HmXw78/4
+
+
+    # After filtering out no chances move to Good filter and adding a point for each match,
+    # move back to bad filters that arent disqualifying and dock a point.
 
 
 
 
 
 
-totalJobs = 0
 urlCount = 0 # Start count at 0 first results page
-urlCountMax = 20 #works in increments of 10 (every 10 is 1 page)
+urlCountMax = 50 #works in increments of 10 (every 10 is 1 page)
 while urlCount < urlCountMax:
     #URL to be scraped on indeed it goes by 10 per page default
     print("\n\nPage: ", (urlCount/10)+1 )
@@ -63,11 +102,7 @@ while urlCount < urlCountMax:
     totalPageListings = len(allJobPosts) #total results returned per page
 
 
-    x = 0
     for jobPost in allJobPosts:
-        x=x+1
-        print("\n----------- Job #", x,"/", totalPageListings," -----------")
         jobCardScrape(jobPost) #send jobPost to be scraped for more specific details
-        totalJobs = totalJobs + 1
 
-print("\n\n Total Jobs Presented: " , totalJobs , " \n\n") 
+print("\n\n Total Jobs Presented: " , x , " \n\n") 
