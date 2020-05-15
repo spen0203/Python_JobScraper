@@ -1,5 +1,5 @@
 This is the Bad filter list, add words or phrases that make a job more likely not match, seperate with commas!
 
-Minimum Years: 5
+Minimum Years: 9
 
 Senior, Extra, Mile, Sr,

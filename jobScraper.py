@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+import datetime
 
 #specific to machine allows connection - google "my user agent" and paste in.
 headers = { "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'}
@@ -40,19 +41,17 @@ def filterScore(jobTitle, companyName, jobURL, jobDesc, easilyApply):
     badFiltersFile = open("BadFilter.txt", "r")
     badFiltersContent = badFiltersFile.readlines()
     minExperienceLimit = int(badFiltersContent[2][15])
+    #print(minExperienceLimit)
     badMatchFlag = 0 #Flag set to 1 if a match <= minExperienceLimit
-
     #Use Regex now to try and find any mention of minimum __ years experience, ( ie. 7 , anything 7 or GT would be discarded)
     while((minExperienceLimit <= 30) & (badMatchFlag == 0)):
-        minExperienceRegex = re.compile(r"(?:min(?:imum)?)? ?(?:["+ str(minExperienceLimit) + "-9]|[0-9]\d)\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?")
-         
-
+        minExperienceRegex = re.compile(r"(?:min(?:imum)? )?" + str(minExperienceLimit) +  "\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?")
         if minExperienceRegex.search(jobDesc.getText().strip()):#check for match
             #print("minimum experience beyond cutoff") #regex correctly takes value from file
             badMatchFlag = 1 #set Flag if match found
         minExperienceLimit = minExperienceLimit + 1 #increment minExperience limit
     if(badMatchFlag == 0):
-        printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc.getText().strip())
+        printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc)
 
 def printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc):
     global x 
@@ -65,25 +64,45 @@ def printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc):
         print("\t", jobTitle.getText().strip())
         print("\t", companyName.getText().strip())
     print(jobURL)
-    print("\n", jobDesc)
+    print("\n", jobDesc.getText().strip())
+    saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc)
+
+#reWrites Joblisting.html and formate basic html
+def createSaveHTML():
+    Html_file= open("jobListings.html","w", encoding='utf-8')
+    Html_file.write('<html>')
+    Html_file.write('<body>')
+    html_str = "<h1 style=\"text-align: center\"> POSTINGS FOUND ON: " + str(datetime.datetime.now()) + "</h1>" 
+
+    Html_file.write(html_str)
+
+
+#appends ending tags to Joblisting.html after postings are added
+def endSaveHTML():
+    Html_file = open("jobListings.html","a", encoding='utf-8')
+    Html_file.write('</body>')
+    Html_file.write('</html>')
+    Html_file.close()   
+
+#appends each job posting to the html page
+def saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc):
+    global x 
+    if(easilyApply == 1):
+        html_str = "<hr><h1>EA\t" + jobTitle.getText().strip() + "</h1><h2>EA\t" + companyName.getText().strip() + "</h2> <a href=\"" + str(jobURL) + "\"> URL LINK </a><br>" + jobDesc.prettify() 
+
+    else:
+        html_str = "<hr><h1>\t" + jobTitle.getText().strip() + "</h1><h2>\t" + companyName.getText().strip() + "</h2> <a href=\"" + str(jobURL) + "\"> URL LINK </a><br>" + jobDesc.prettify() 
+    Html_file = open("jobListings.html","a", encoding='utf-8')
+    Html_file.write(html_str)
+   
 
 
 
-    #if(jobDesc.findAll())
-    # "(?:min(?:imum)?)? ?(?:[7-9]|[1-9]\d) years ?(?:of)? experience"
-    #https://regex101.com/r/HmXw78/4
 
-
-    # After filtering out no chances move to Good filter and adding a point for each match,
-    # move back to bad filters that arent disqualifying and dock a point.
-
-
-
-
-
+createSaveHTML() #rewrites the html document for newest scrape
 
 urlCount = 0 # Start count at 0 first results page
-urlCountMax = 50 #works in increments of 10 (every 10 is 1 page)
+urlCountMax = 10 #works in increments of 10 (every 10 is 1 page)
 while urlCount < urlCountMax:
     #URL to be scraped on indeed it goes by 10 per page default
     print("\n\nPage: ", (urlCount/10)+1 )
@@ -105,4 +124,17 @@ while urlCount < urlCountMax:
     for jobPost in allJobPosts:
         jobCardScrape(jobPost) #send jobPost to be scraped for more specific details
 
+endSaveHTML()
 print("\n\n Total Jobs Presented: " , x , " \n\n") 
+
+
+
+# 
+#                       * how can i optionally make this 9?
+#(?:min(?:imum)?)? ?(?:[6-9]|[0-9]\d)\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?
+#         minExperienceRegex = re.compile(r"(?:min(?:imum)?)? ?(?:["+ str(minExperienceLimit) + "-9]|[0-9]\d)\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?")
+
+
+#Solution
+# (?:min(?:imum)? )?6\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?
+# "(?:min(?:imum)? )?" + str(minExperienceLimit) +  "\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?"
