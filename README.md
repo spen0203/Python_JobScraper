@@ -11,5 +11,6 @@ v2. Now filters out job postings based on a minimum year experience, and saves a
 <h2>companyName</h2>
 <a href="jobURL"> URL LINK </a><br>
 jobDesc
+<hr>
 
 Next steps will be working on filters and flags, If a certain skill or langauge is required I will set a corresponding flag. Using theese flags I hope to build a modular resume that python can adapt to each posting to get the best results.
