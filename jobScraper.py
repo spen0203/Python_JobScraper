@@ -52,10 +52,10 @@ def filterScore(jobTitle, companyName, jobURL, jobDesc, easilyApply):
         minExperienceLimit = minExperienceLimit + 1 #increment minExperience limit
     if(badMatchFlag == 0):
         printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc)
+        saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc)
+
 
 def printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc):
-    global x 
-    x = x + 1
     print("\n----------- Job #", x," -----------")
     if(easilyApply == 1):
         print("Æ\t", jobTitle.getText().strip())
@@ -65,7 +65,6 @@ def printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc):
         print("\t", companyName.getText().strip())
     print(jobURL)
     print("\n", jobDesc.getText().strip())
-    saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc)
 
 #reWrites Joblisting.html and formate basic html
 def createSaveHTML():
@@ -73,13 +72,15 @@ def createSaveHTML():
     Html_file.write('<html>')
     Html_file.write('<body>')
     html_str = "<h1 style=\"text-align: center\"> POSTINGS FOUND ON: " + str(datetime.datetime.now()) + "</h1>" 
-
     Html_file.write(html_str)
 
 
 #appends ending tags to Joblisting.html after postings are added
 def endSaveHTML():
+    global x 
     Html_file = open("jobListings.html","a", encoding='utf-8')
+    html_str = "<h1 style=\"text-align: center\"> END OF POSTINGS, FOUND: " + str(x) + "</h1>" 
+    Html_file.write(html_str)
     Html_file.write('</body>')
     Html_file.write('</html>')
     Html_file.close()   
@@ -87,6 +88,7 @@ def endSaveHTML():
 #appends each job posting to the html page
 def saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc):
     global x 
+    x = x + 1
     if(easilyApply == 1):
         html_str = "<hr><h1>EA\t" + jobTitle.getText().strip() + "</h1><h2>EA\t" + companyName.getText().strip() + "</h2> <a href=\"" + str(jobURL) + "\"> URL LINK </a><br>" + jobDesc.prettify() 
 
@@ -102,7 +104,7 @@ def saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc):
 createSaveHTML() #rewrites the html document for newest scrape
 
 urlCount = 0 # Start count at 0 first results page
-urlCountMax = 10 #works in increments of 10 (every 10 is 1 page)
+urlCountMax = 50 #works in increments of 10 (every 10 is 1 page)
 while urlCount < urlCountMax:
     #URL to be scraped on indeed it goes by 10 per page default
     print("\n\nPage: ", (urlCount/10)+1 )
