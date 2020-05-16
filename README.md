@@ -14,3 +14,7 @@ jobDesc
 <hr>
 
 Next steps will be working on filters and flags, If a certain skill or langauge is required I will set a corresponding flag. Using theese flags I hope to build a modular resume that python can adapt to each posting to get the best results.
+
+
+I have started creating a spread sheet that contains 3 pages: Skill, Related Work, Unrelated work.
+Im going to start with filling Unrelated work with softskills used on that job to best match postings, I decided to start here as it will require the least logic. Skills and Related work will have to create a balance of skills matched to their importance. (Most Techpostings have few soft skills listed compared to technical makes sense)
