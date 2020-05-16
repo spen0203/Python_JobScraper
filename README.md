@@ -18,3 +18,6 @@ Next steps will be working on filters and flags, If a certain skill or langauge 
 
 I have started creating a spread sheet that contains 3 pages: Skill, Related Work, Unrelated work.
 Im going to start with filling Unrelated work with softskills used on that job to best match postings, I decided to start here as it will require the least logic. Skills and Related work will have to create a balance of skills matched to their importance. (Most Techpostings have few soft skills listed compared to technical makes sense)
+
+
+Going to make a basic word frequency analysis function to make finding keywords easier, similiar words could then be grouped and during the search for word x replace the x in the string with word. This could allow words like 
