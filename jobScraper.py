@@ -51,7 +51,9 @@ def filterScore(jobTitle, companyName, jobURL, jobDesc, easilyApply):
             badMatchFlag = 1 #set Flag if match found
         minExperienceLimit = minExperienceLimit + 1 #increment minExperience limit
     if(badMatchFlag == 0):
-        printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc)
+        # printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc)
+        wordFrequencyAnalysis(jobDesc)
+        #printWordsList()
         saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc)
 
 
@@ -98,13 +100,66 @@ def saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc):
     Html_file.write(html_str)
    
 
+# wordFrequencyAnalysis()
+# Reads every job description counting each unique word.
+wordsList = ["the"]
+wordsCountList = [0]
+def wordFrequencyAnalysis(jobDesc):
+    global wordsList
+    global wordsCountList
+    regexTextStrip = re.compile('[^a-zA-Z]') #if its not text its not a keyword (years arent required)
+    newjobDesc = regexTextStrip.sub(' ', jobDesc.getText()) #Strip none chars
+    for newWord in newjobDesc.lower().split(): 
+        for existingWord in wordsList:
+            matchFlag = 0
+            if newWord.strip().lower() == existingWord: 
+            	wordIndex = wordsList.index(newWord)
+            	wordsCountList[wordIndex] = wordsCountList[wordIndex] + 1
+            	matchFlag = 1
+            	break
+        if matchFlag == 0:
+                wordsList.append(newWord)
+                wordsCountList.append(1)
 
+# Sorts the WordsList by most used word
+# wordFrequencyAnalysis
+def sortWordsList():
+    global wordsList
+    global wordsCountList
+     #Sort words by assoaciated count, tutorial: https://kite.com/python/answers/how-to-sort-two-lists-together-in-python
+    zipList = zip(wordsCountList, wordsList) #merge lists togethor
+    sortList = sorted(zipList) #sort list
+    tupleList = zip(*sortList)
+    wordsList, wordsCountList = [list(tuple) for tuple in tupleList]
+
+#Prints list from wordFrequencyAnalysis()
+def printWordsList():
+    global wordsList
+    global wordsCountList
+    sortWordsList()
+    wordCount = 0
+    while wordCount < len(wordsList):
+        print(wordsList[wordCount], " - " , wordsCountList[wordCount] )         
+        wordCount = wordCount + 1 
+
+#Saves list from wordFrequencyAnalysis()
+def saveWordsList():
+    global wordsList
+    global wordsCountList
+    sortWordsList()
+    keyWordfile = open("keywordsList.txt","w", encoding='utf-8')
+    wordCount = 0
+    while wordCount < len(wordsList):
+        newLine = str(wordsList[wordCount]) + " - " + str(wordsCountList[wordCount]) + str(" \n")
+        keyWordfile.write(newLine)
+        wordCount = wordCount + 1 
+    keyWordfile.close()
 
 
 createSaveHTML() #rewrites the html document for newest scrape
 
 urlCount = 0 # Start count at 0 first results page
-urlCountMax = 50 #works in increments of 10 (every 10 is 1 page)
+urlCountMax = 10 #works in increments of 10 (every 10 is 1 page)
 while urlCount < urlCountMax:
     #URL to be scraped on indeed it goes by 10 per page default
     print("\n\nPage: ", (urlCount/10)+1 )
@@ -128,7 +183,8 @@ while urlCount < urlCountMax:
 
 endSaveHTML()
 print("\n\n Total Jobs Presented: " , x , " \n\n") 
-
+#printWordsList() 
+saveWordsList()
 
 
 # 
