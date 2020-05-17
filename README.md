@@ -40,7 +40,6 @@ Keywords_List.txt - Displays only the words without a count.
 
 Using Keywords_Count and Keywords_List determine useful keywords and optionally add more to 
 keywordFilters.txt - Stops the machine from counting that word.
------- Under Construction -----
-GoodFilter.txt - Keywords here are specific words to watch for. ( Later Update will highlight words when present in posting, return phrases related or directly modify a resume)
------
 
+*GoodFilter.txt - Keywords here are specific words to watch for. ( Later Update will highlight words when present in posting, return phrases related or directly modify a resume)
+*Creation in progress, preffered method if skills are known.
