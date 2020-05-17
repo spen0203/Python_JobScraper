@@ -21,3 +21,26 @@ Im going to start with filling Unrelated work with softskills used on that job t
 
 
 Going to make a basic word frequency analysis function to make finding keywords easier, similiar words could then be grouped and during the search for word x replace the x in the string with word. This could allow words like 
+
+
+
+
+<h1> Suggested Use </h1>
+Adjust the programs vars:
+
+urlCount = 0 # Start count at 0 first results page
+urlCountMax = 10 #works in increments of 10 (every 10 is 1 page)
+URL = your search on indeed(more filters in search the better)
+
+Run jobScraper.py
+
+After first run completes check 
+Keywords_Count.txt - This displays how frequently a word is displayed between all postings.
+Keywords_List.txt - Displays only the words without a count.
+
+Using Keywords_Count and Keywords_List determine useful keywords and optionally add more to 
+keywordFilters.txt - Stops the machine from counting that word.
+------ Under Construction -----
+GoodFilter.txt - Keywords here are specific words to watch for. ( Later Update will highlight words when present in posting, return phrases related or directly modify a resume)
+-----
+
