@@ -89,7 +89,9 @@ def endSaveHTML():
 
 #appends each job posting to the html page
 def saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc):
-    global x 
+    global x
+    global goodWordsList
+ 
     x = x + 1
     if(easilyApply == 1):
         html_str = "<hr><h1>EA\t" + jobTitle.getText().strip() + "</h1><h2>EA\t" + companyName.getText().strip() + "</h2> <a href=\"" + str(jobURL) + "\"> URL LINK </a><br>" + jobDesc.prettify() 
@@ -98,28 +100,59 @@ def saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc):
         html_str = "<hr><h1>\t" + jobTitle.getText().strip() + "</h1><h2>\t" + companyName.getText().strip() + "</h2> <a href=\"" + str(jobURL) + "\"> URL LINK </a><br>" + jobDesc.prettify() 
     Html_file = open("jobListings.html","a", encoding='utf-8')
     Html_file.write(html_str)
+    html_str = "<h3 style=\"color:red\">"
+    for word in goodWordsList:
+        html_str = html_str + ", " + word
+    html_str = html_str + "</h3>"
+    Html_file.write(html_str)
+
+
    
 
 # wordFrequencyAnalysis()
 # Reads every job description counting each unique word.
-wordsList = ["the"]
-wordsCountList = [0]
+wordsList = [] #Used for keyword List
+wordsCountList = [0] #Used for keyword List Count
+goodWordsList = [] #Used in posting lists
 def wordFrequencyAnalysis(jobDesc):
     global wordsList
     global wordsCountList
-    regexTextStrip = re.compile('[^a-zA-Z]') #if its not text its not a keyword (years arent required)
+    global goodWordsList
+    goodWordsList = [] # reset with new posting
+
+    keyWordFilters = open("keywordsFilters.txt","r", encoding='utf-8').read()
+    goodWordFilters = open("GoodFilter.txt","r", encoding='utf-8').read()
+    regexTextStrip = re.compile('([^a-zA-Z\+#-])') #if its not text its not a keyword (years arent required)
     newjobDesc = regexTextStrip.sub(' ', jobDesc.getText()) #Strip none chars
-    for newWord in newjobDesc.lower().split(): 
-        for existingWord in wordsList:
-            matchFlag = 0
-            if newWord.strip().lower() == existingWord: 
-            	wordIndex = wordsList.index(newWord)
-            	wordsCountList[wordIndex] = wordsCountList[wordIndex] + 1
-            	matchFlag = 1
-            	break
-        if matchFlag == 0:
-                wordsList.append(newWord)
-                wordsCountList.append(1)
+    for newWord in newjobDesc.lower().split(): #each word in posting
+        matchFlag = 0
+        for existingWord in wordsList: # compared to each word already in list
+            if newWord == existingWord:
+                    wordIndex = wordsList.index(newWord)
+                    wordsCountList[wordIndex] = wordsCountList[wordIndex] + 1
+                    matchFlag = 1
+                    break
+        if matchFlag == 0: #new word doesnt match existing list, check vs good than bad filters
+            #Check good filter
+            goodMatchFlag = 0
+            for goodWord in goodWordFilters.split(): #Check the word being added isnt bad
+                if(newWord.lower() == goodWord.lower()):
+                    goodMatchFlag = 1
+                    for existingword in goodWordsList:
+                        if(newWord.lower() == existingword.lower()):
+                            goodMatchFlag = 0
+
+            if goodMatchFlag == 1: #Word is on good list so add it
+                goodWordsList.append(newWord)
+            else:
+                #check if its part of the bad filter 
+                badMatchFlag = 0
+                for badWord in keyWordFilters.split(): #Check the word being added isnt bad
+                    if(newWord.lower() == badWord.lower()):
+                        badMatchFlag = 1
+                if badMatchFlag != 1: #Word isnt on list or to be filtered so add it
+                    wordsList.append(newWord)
+                    wordsCountList.append(1)
 
 # Sorts the WordsList by most used word
 # wordFrequencyAnalysis
@@ -142,19 +175,24 @@ def printWordsList():
         print(wordsList[wordCount], " - " , wordsCountList[wordCount] )         
         wordCount = wordCount + 1 
 
-#Saves list from wordFrequencyAnalysis()
+#Saves two lists from wordFrequencyAnalysis()
+#One is just a list of unique words, the other the count of each unique word.
 def saveWordsList():
     global wordsList
     global wordsCountList
     sortWordsList()
-    keyWordfile = open("keywordsList.txt","w", encoding='utf-8')
+    keyWordCountfile = open("keywords_CountList.txt","w", encoding='utf-8')
+    keyWordfile = open("keywords_List.txt","w", encoding='utf-8')
+
     wordCount = 0
     while wordCount < len(wordsList):
-        newLine = str(wordsList[wordCount]) + " - " + str(wordsCountList[wordCount]) + str(" \n")
-        keyWordfile.write(newLine)
+        newCountLine = str(wordsList[wordCount]) + " - " + str(wordsCountList[wordCount]) + str(" \n")
+        newWordLine = wordsCountList[wordCount] + " \n"
+        keyWordCountfile.write(newCountLine)
+        keyWordfile.write(newWordLine)
         wordCount = wordCount + 1 
+    keyWordCountfile.close()
     keyWordfile.close()
-
 
 createSaveHTML() #rewrites the html document for newest scrape
 
@@ -187,12 +225,3 @@ print("\n\n Total Jobs Presented: " , x , " \n\n")
 saveWordsList()
 
 
-# 
-#                       * how can i optionally make this 9?
-#(?:min(?:imum)?)? ?(?:[6-9]|[0-9]\d)\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?
-#         minExperienceRegex = re.compile(r"(?:min(?:imum)?)? ?(?:["+ str(minExperienceLimit) + "-9]|[0-9]\d)\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?")
-
-
-#Solution
-# (?:min(?:imum)? )?6\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?
-# "(?:min(?:imum)? )?" + str(minExperienceLimit) +  "\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?"
