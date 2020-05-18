@@ -102,7 +102,7 @@ concepts
  HTML 
  C
  C#
- C++ 
+  C++ 
  JavaScript
  Vue
  .Net
@@ -161,3 +161,8 @@ bots
 frameworks
 python
 databases
+MS 
+Visual 
+Studio 
+SQL 
+

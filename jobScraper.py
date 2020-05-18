@@ -87,24 +87,35 @@ def endSaveHTML():
     Html_file.write('</html>')
     Html_file.close()   
 
-#appends each job posting to the html page
+#appends each job posting to the html page in easy to read format
 def saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc):
     global x
-    global goodWordsList
- 
+    global softSkillList
+    global techSkillList
+
     x = x + 1
     if(easilyApply == 1):
         html_str = "<hr><h1>EA\t" + jobTitle.getText().strip() + "</h1><h2>EA\t" + companyName.getText().strip() + "</h2> <a href=\"" + str(jobURL) + "\"> URL LINK </a><br>" + jobDesc.prettify() 
-
     else:
         html_str = "<hr><h1>\t" + jobTitle.getText().strip() + "</h1><h2>\t" + companyName.getText().strip() + "</h2> <a href=\"" + str(jobURL) + "\"> URL LINK </a><br>" + jobDesc.prettify() 
     Html_file = open("jobListings.html","a", encoding='utf-8')
     Html_file.write(html_str)
-    html_str = "<h3 style=\"color:red\">"
-    for word in goodWordsList:
+
+    #print Tech skills
+    html_str = "<h3 style=\"color:green\">"
+    for word in techSkillList:
         html_str = html_str + ", " + word
     html_str = html_str + "</h3>"
     Html_file.write(html_str)
+
+    #Print soft skills 
+    html_str = "<h3 style=\"color:orange\">"
+    for word in softSkillList:
+        html_str = html_str + ", " + word
+    html_str = html_str + "</h3>"
+    Html_file.write(html_str)
+
+
 
 
    
@@ -113,15 +124,21 @@ def saveListofPostings(jobTitle, companyName, jobURL, easilyApply, jobDesc):
 # Reads every job description counting each unique word.
 wordsList = [] #Used for keyword List
 wordsCountList = [0] #Used for keyword List Count
-goodWordsList = [] #Used in posting lists
+softSkillList = [] #Used to highlight skills in posting 
+techSkillList = [] #Used to highlight skills in posting 
+
 def wordFrequencyAnalysis(jobDesc):
     global wordsList
     global wordsCountList
-    global goodWordsList
-    goodWordsList = [] # reset with new posting
+    global softSkillList
+    global techSkillList
+    softSkillList = [] # reset with each new posting
+    techSkillList = [] # reset with each new posting
 
     keyWordFilters = open("keywordsFilters.txt","r", encoding='utf-8').read()
-    goodWordFilters = open("GoodFilter.txt","r", encoding='utf-8').read()
+    goodSoftSkillFilters = open("GoodSoftSkillFilter.txt","r", encoding='utf-8').read()
+    goodTechnicalFilters = open("GoodTechnicalFilter.txt","r", encoding='utf-8').read()
+
     regexTextStrip = re.compile('([^a-zA-Z\+#-])') #if its not text its not a keyword (years arent required)
     newjobDesc = regexTextStrip.sub(' ', jobDesc.getText()) #Strip none chars
     for newWord in newjobDesc.lower().split(): #each word in posting
@@ -132,18 +149,36 @@ def wordFrequencyAnalysis(jobDesc):
                     wordsCountList[wordIndex] = wordsCountList[wordIndex] + 1
                     matchFlag = 1
                     break
-        if matchFlag == 0: #new word doesnt match existing list, check vs good than bad filters
+        #If the new word is unique and not yet in the array
+        # Now check it versus good and bad filters
+        if matchFlag == 0: 
             #Check good filter
-            goodMatchFlag = 0
-            for goodWord in goodWordFilters.split(): #Check the word being added isnt bad
-                if(newWord.lower() == goodWord.lower()):
-                    goodMatchFlag = 1
-                    for existingword in goodWordsList:
-                        if(newWord.lower() == existingword.lower()):
-                            goodMatchFlag = 0
+            #start
+            softSkillFlag = 0
+            techSkillFlag = 0
 
-            if goodMatchFlag == 1: #Word is on good list so add it
-                goodWordsList.append(newWord)
+            # Soft Skills List builder (check if new words part of skill list, and not yet added to array. if so set flag) 
+            for goodSkill in goodSoftSkillFilters.split(): #Check the word being added isnt bad
+                if(newWord.lower() == goodSkill.lower()):
+                    softSkillFlag = 1
+                    for existingword in softSkillList:
+                        if(newWord.lower() == existingword.lower()):
+                            softSkillFlag = 0
+
+            # Technical Skills List builder (check if new words part of skill list, and not yet added to array. if so set flag) 
+            for techSkill in goodTechnicalFilters.split(): #Check the word being added isnt bad
+                if(newWord.lower() == techSkill.lower()):
+                    techSkillFlag = 1
+                    for existingword in techSkillList:
+                        if(newWord.lower() == existingword.lower()):
+                            techSkillFlag = 0
+
+
+            if softSkillFlag == 1:
+                softSkillList.append(newWord)
+            elif techSkillFlag == 1:
+                techSkillList.append(newWord)
+            #end
             else:
                 #check if its part of the bad filter 
                 badMatchFlag = 0
@@ -154,7 +189,7 @@ def wordFrequencyAnalysis(jobDesc):
                     wordsList.append(newWord)
                     wordsCountList.append(1)
 
-# Sorts the WordsList by most used word
+# Sorts the WordsList by Frequency
 # wordFrequencyAnalysis
 def sortWordsList():
     global wordsList
@@ -165,7 +200,7 @@ def sortWordsList():
     tupleList = zip(*sortList)
     wordsList, wordsCountList = [list(tuple) for tuple in tupleList]
 
-#Prints list from wordFrequencyAnalysis()
+#Prints list from wordFrequencyAnalysis() to console
 def printWordsList():
     global wordsList
     global wordsCountList
@@ -194,10 +229,16 @@ def saveWordsList():
     keyWordCountfile.close()
     keyWordfile.close()
 
+
+
+
+#######################################################################
+# Main Function is here down
+#######################################################################
 createSaveHTML() #rewrites the html document for newest scrape
 
 urlCount = 0 # Start count at 0 first results page
-urlCountMax = 10 #works in increments of 10 (every 10 is 1 page)
+urlCountMax = 30 #works in increments of 10 (every 10 is 1 page)
 while urlCount < urlCountMax:
     #URL to be scraped on indeed it goes by 10 per page default
     print("\n\nPage: ", (urlCount/10)+1 )
