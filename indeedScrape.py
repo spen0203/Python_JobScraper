@@ -17,10 +17,8 @@ def printPosting(jobNum, jobTitle, companyName, jobURL, easilyApply, jobDesc):
 
 
 #Scrapes the specific posting for title, company, jobdesc
-def scrapeJobPosting(jobPosting):
-    for scrapeTag in ['jobtitle','company','jobsearch-jobDescriptionText']
-        scrapeTag = jobPosting.find(class_=scrapeTag)
-    jobTitle, companyName, jobDescription = jobPosting.find(class_="jobtitle"), jobPost.find(class_="company"),soup.find(class_="jobsearch-jobDescriptionText") 
+def scrapeJobPosting(jobPosting, soup):
+    jobTitle, companyName, jobDescription = jobPosting.find(class_="jobtitle"), jobPosting.find(class_="company"),soup.find(class_="jobsearch-jobDescriptionText") 
     companyLink = "https://ca.indeed.com" + str(jobPosting.find('a', class_="jobtitle").get('href'))
     easilyApply = True if jobPosting.find(class_="iaLabel") else False #ternariry operator
     jobDescription = soup.find(class_="jobsearch-jobDescriptionText")
@@ -28,15 +26,15 @@ def scrapeJobPosting(jobPosting):
 
 
 #Scraped the specific URL passing each JobPosting per page
-def scrapeIndeedPage(pageURL):
+def scrapeIndeedPage(pageURL,headers):
     page = requests.get(pageURL, headers=headers)
     soup = BeautifulSoup(page.content, 'html.parser')
     for posting in soup.findAll(class_="jobsearch-SerpJobCard"):
-        scrapeJobPosting(posting)
+        scrapeJobPosting(posting,soup)
     
 #Create the indeed URL to be scraped and begin scraping
-def main():
-    def __init__(self):
+def main(headers):
+    def __init__(self,headers):
         pageNumber, pageUrlNumber, maxPages = 0, 0, 5
         jobCount = 0
         while pageNumber < maxPages:
@@ -44,7 +42,4 @@ def main():
             URL = 'https://ca.indeed.com/jobs?q=Software+%2450%2C000&l=Ottawa%2C+ON&radius=5&jt=fulltime&start=' + str(pageUrlNumber)
             print("\n******************************************************\n  ", URL, "\n******************************************************")
             pageUrlNumber =+ 10
-            scrapeIndeedPage(URL)
-
-if __name__ == "__main__":
-    main()
+            scrapeIndeedPage(URL, headers)

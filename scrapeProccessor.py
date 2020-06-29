@@ -2,7 +2,7 @@
 #Will call indeedScraper, LinkedinScraper etc and be returned an object or standerdized item.
 #Then I will use the items inside filterScore to determine the best match and sort method before
 #returning or saving the complete list
-
+import re, collections
 
 #Print out the list of word Frequencies
 def printWordFrequencyAnalysis(strippedDesc):
@@ -35,7 +35,8 @@ def filterController():
     pass
 
 def main():
-    
+    pass
 
 if __name__ == "__main__":
     main()
+
