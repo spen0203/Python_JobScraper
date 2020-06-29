@@ -1,6 +1,0 @@
-This is the good filter list, add words or phrases that make a job more likely a match, seperate with commas!
-
-Python, HTML , Java , JavaScript , Script, REST, Vue, Front, End, framework, research, develop, Independently, Computer, Science,
-Software, Linux, Git, Agile, Passionate, communication, team, Problem, Solver, Current, Design, Patterns, Clean, Self-motivated, 
-Motivated, Member, Player, GitHub, Documentation, Practices, Backend, Computer, SEO, Microcontroller, Web, Website, Windows, Mac,
- Ruby, On Rails, C, C++, Razer, .Net, XML, OOP
