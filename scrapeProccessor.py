@@ -43,7 +43,6 @@ def displayList(jobPostings):
 
 def main():
     jobPostings = indeed.main(headers) #Gets list of namedtuple of all jobs found by indeedscrape
-    
     displayList(jobPostings)
     
    
