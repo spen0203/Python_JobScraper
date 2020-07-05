@@ -13,7 +13,7 @@ def printPosting(jobTitle, companyName, jobURL, easilyApply, jobDesc):
         print("\t", jobTitle)
         print("\t", companyName)
     print(jobURL)
-    print("\n", jobDesc)
+    print("\n", jobDesc.getText().strip())
 
 
 
@@ -26,7 +26,7 @@ def scrapeJobPosting(jobPosting,headers, jobID):
     page = requests.get(jobURL, headers=headers) #new soup object of specific job page
     soup = BeautifulSoup(page.content, 'html.parser')
     if (jobPosting.find(class_="jobtitle") and jobPosting.find(class_="company") and soup.find(class_="jobsearch-jobDescriptionText")):
-        jobTitle, companyName, jobDesc = jobPosting.find(class_="jobtitle").getText().strip() , jobPosting.find(class_="company").getText().strip() ,soup.find(class_="jobsearch-jobDescriptionText").getText().strip() 
+        jobTitle, companyName, jobDesc = jobPosting.find(class_="jobtitle").getText().strip() , jobPosting.find(class_="company").getText().strip() ,soup.find(class_="jobsearch-jobDescriptionText") 
     easilyApply = True if jobPosting.find(class_="iaLabel") else False #ternariry operator
     
     posting = indeedposting(jobTitle, companyName, jobURL, easilyApply, jobDesc)
@@ -50,9 +50,9 @@ def scrapeIndeedPage(pageURL,headers):
     return jobPostings  
     
 #Create the indeed URL to be scraped and begin scraping
-def main(headers):
+def main(headers, maxpages):
     jobPostings = []
-    pageNumber, pageUrlNumber, maxPages = 0, 0, 1
+    pageNumber, pageUrlNumber, maxPages = 0, 0, maxpages
     while pageNumber < maxPages:
         print("\n\nPage: ", pageNumber)
         URL = 'https://ca.indeed.com/jobs?q=Software+%2450%2C000&l=Ottawa%2C+ON&radius=5&jt=fulltime&start=' + str(pageUrlNumber)

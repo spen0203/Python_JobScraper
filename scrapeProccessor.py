@@ -20,43 +20,54 @@ def wordFrequencyAnalysis(strippedDesc):
     return collections.Counter(word for word in strippedDesc.split())
 
 # Used to find each unique word in a posting
-def uniqueWordList(strippedDesc):
+def uniqueWordList(strippedDesc):   
     return {word for word in strippedDesc.split()}   
 
 
 # Filters out jobs not fit to display.
-#ie: 10 years experience, None Tech jobs etc
-def badFilters():
-    pass
+# Defined in BadFilter.txt
+#ie: Minimum 10 years experience
+def badFilters(jobPost):
+    print(jobPost)
+    if jobPost.jobTitle == '' or jobPost.companyName == '' or jobPost.jobDesc.getText().strip() == '':
+        return True
+    #Start by filtering out minimum years experience
+    badFiltersFile = open("TextFilters/BadFilter.txt", "r")
+    badFiltersContent = badFiltersFile.readlines()
+    minExperienceLimit = int(re.sub('[^0-9]','',badFiltersContent[2][14:18])) 
+    for i in range(minExperienceLimit,100):
+        minExperienceRegex = re.compile(r"(?:min(?:imum)? )?" + str(i) +  "\+? (?:year(?:s)?)? ?(?:of)? ?(?:experience)? ?(?:required)?")
+        if minExperienceRegex.search(jobPost.jobDesc.getText().strip()):
+            return True            
+    return jobPost
 
-def filterScore():
-    pass
 
-#will control what filters to apply to postings
-def filterController():
-    pass
+
+#find good keywords as definded in text files, matches them in each job to better highlight required skills
+def goodFilters(post):
+
+    softSkillList = {word for word in open("TextFilters/GoodSoftSkillFilter.txt","r", encoding='utf-8').read().split() if word in post.jobDesc.getText().strip().split()}
+    techSkillList = {word for word in open("TextFilters/GoodTechnicalFilter.txt","r", encoding='utf-8').read().split() if word in post.jobDesc.getText().strip().split()}
+
+    filteredPosting = namedtuple("Job", "jobTitle companyName jobURL easilyApply jobDesc softSkill techSkill")
+    return filteredPosting(post.jobTitle, post.companyName, post.jobURL, post.easilyApply, post.jobDesc, softSkillList, techSkillList)
+
+
+#Applies Good and Bad filters to each posting, returns list of only valid posts
+def filterScore(jobPostings):
+    filteredPosts = []
+    for post in jobPostings:
+        if badFilters(post) != True: 
+            filteredPosts.append(goodFilters(post))
+    return filteredPosts
+    
 
 def displayList(jobPostings):
     for post in jobPostings:
-        print(post.jobTitle + '\n' + post.companyName + '\n' + post.jobURL + '\n\n' + post.jobDesc)
+        print(post)
         print("\n--------------------------\n")
 
-def main():
-    jobPostings = indeed.main(headers) #Gets list of namedtuple of all jobs found by indeedscrape
-    displayList(jobPostings)
-    
-   
-
-
-if __name__ == "__main__":
-    main()
-
-
-#Named tuple will be used to store all the postings, faster than object 
-
-#jobPostings = namedtuple("Job", "jobTitle companyName jobURL easilyApply jobDesc softSkills technicalSkills")
-
-#designer = Job(jobTitle="designer", companyName="Apple", jobURL="www.apple.com...", easilyApply=True,
-#               jobDesc="lorem ipsum dolor...", softSkills="...", technicalSkills="...")
-#
-#    print(designer)
+def main(maxpages):
+    jobPostings = indeed.main(headers, maxpages) #Gets list of namedtuple of all jobs found by indeedscrape
+    jobPostings = filterScore(jobPostings) #filter list of posting
+    return jobPostings
