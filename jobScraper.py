@@ -9,7 +9,7 @@ def sortfunc(e):
 #creates html file and adds list from ScrapeProccessor to it
 def main():
     count = 0
-    maxpages = 10
+    maxpages = 1
     exportResults.createListingSaveHTML()
     for post in sorted(scraper.main(maxpages), reverse=True, key=sortfunc):
         #print(post)
