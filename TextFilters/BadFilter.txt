@@ -1,5 +1,5 @@
 This is the Bad filter list, add words or phrases that make a job more likely not match, seperate with commas!
-
-Minimum Years: 9
+-this will remove anything with a greater minimum experience required than minimum years
+Minimum Years: 1        
 
 Senior, Extra, Mile, Sr, NO EXTERNAL CANDIDACIES,
