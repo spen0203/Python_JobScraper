@@ -57,7 +57,7 @@ def main(headers, maxpages):
         print("\n\nPage: ", pageNumber)
         URL = 'https://ca.indeed.com/jobs?q=Software+%2450%2C000&l=Ottawa%2C+ON&radius=5&jt=fulltime&start=' + str(pageUrlNumber)
         print("\n******************************************************\n  ", URL, "\n******************************************************")
-        pageUrlNumber =+ 10
+        pageUrlNumber += 10
         jobPostings += scrapeIndeedPage(URL, headers)
         pageNumber += 1
     return jobPostings
